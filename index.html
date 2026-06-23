@@ -1,409 +1,522 @@
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>카페 키오스크</title>
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <style>
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    .fade-in { animation: fadeIn 0.25s ease-in-out; }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
-    body { background-color: #f3f4f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>키오스크 주문 시스템</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .fade-in { animation: fadeIn 0.25s ease-in-out; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
+        .line-clamp-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
-  <div id="root"></div>
 
-  <script type="text/babel">
-    const { useState } = React;
+    <div class="w-[480px] h-[850px] mx-auto bg-[#212121] rounded-[3rem] p-4 flex flex-col shadow-2xl relative select-none">
+        <!-- 상단 스피커 모양 (단말기 디자인 요소) -->
+        <div class="h-12 flex items-center justify-center shrink-0">
+            <div class="w-16 h-2 bg-gray-600 rounded-full"></div>
+        </div>
 
-    // 아이콘 SVG 컴포넌트 직접 구현 (외부 라이브러리 의존성 제거)
-    const ChevronLeft = ({ size = 24, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m15 18-6-6 6-6"/></svg>
-    );
-    const Plus = ({ size = 24, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-    );
-    const X = ({ size = 24, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-    );
-    const CreditCard = ({ size = 24, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
-    );
+        <!-- 메인 화면 컨테이너 -->
+        <div id="app" class="flex-1 bg-[#EDEDED] text-[#212121] rounded-[2rem] overflow-hidden relative border-[6px] border-[#212121] flex flex-col">
+            <!-- 내용은 자바스크립트로 렌더링 됩니다. -->
+        </div>
+    </div>
 
-    const MENU_ITEMS = [
-      { id: 'c1', name: '아메리카노', price: 4500, category: 'coffee' },
-      { id: 'c2', name: '카페라떼', price: 5000, category: 'coffee' },
-      { id: 'c3', name: '에스프레소', price: 4000, category: 'coffee' },
-      { id: 'b1', name: '말차라떼', price: 5500, category: 'beverage' },
-      { id: 'b2', name: '딸기라떼', price: 5500, category: 'beverage' },
-      { id: 'b3', name: '밀크티', price: 5500, category: 'beverage' },
-      { id: 'b4', name: '레몬에이드', price: 5500, category: 'beverage' },
-      { id: 'd1', name: '바스크 치즈 조각 케이크', price: 6500, category: 'dessert' },
-      { id: 'd2', name: '딸기빙수', price: 12000, category: 'dessert' },
-      { id: 'd3', name: '허니브레드', price: 6000, category: 'dessert' },
-    ];
+    <script>
+        // 데이터
+        const MENU_ITEMS = [
+            { id: 'c1', name: '아메리카노', price: 4500, category: 'coffee' },
+            { id: 'c2', name: '카페라떼', price: 5000, category: 'coffee' },
+            { id: 'c3', name: '에스프레소', price: 4000, category: 'coffee' },
+            { id: 'b1', name: '말차라떼', price: 5500, category: 'beverage' },
+            { id: 'b2', name: '딸기라떼', price: 5500, category: 'beverage' },
+            { id: 'b3', name: '밀크티', price: 5500, category: 'beverage' },
+            { id: 'b4', name: '레몬에이드', price: 5500, category: 'beverage' },
+            { id: 'd1', name: '바스크 치즈 조각 케이크', price: 6500, category: 'dessert' },
+            { id: 'd2', name: '딸기빙수', price: 12000, category: 'dessert' },
+            { id: 'd3', name: '허니브레드', price: 6000, category: 'dessert' },
+        ];
 
-    let audioCtx = null;
-    const playChime = () => {
-      try {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-
-        const playNote = (freq, startTime, duration) => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, audioCtx.currentTime + startTime);
-          
-          gain.gain.setValueAtTime(0, audioCtx.currentTime + startTime);
-          gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + startTime + 0.05);
-          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + startTime + duration);
-          
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          
-          osc.start(audioCtx.currentTime + startTime);
-          osc.stop(audioCtx.currentTime + startTime + duration);
+        // 아이콘 SVG 문자열 (Lucide Icons 기반)
+        const Icons = {
+            ChevronLeft: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`,
+            Plus: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`,
+            X: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
+            CreditCard: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>`
         };
 
-        playNote(659.25, 0, 0.15);
-        playNote(880.00, 0.12, 0.3);
-
-      } catch (e) {
-        console.warn("오디오 재생 실패:", e);
-      }
-    };
-
-    const speakText = (text) => {
-      try {
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = 'ko-KR';
-          utterance.rate = 1.0;
-          window.speechSynthesis.speak(utterance);
-        }
-      } catch (e) {
-        console.warn("음성 재생 실패:", e);
-      }
-    };
-
-    function App() {
-      const [screen, setScreen] = useState('menu');
-      const [activeCategory, setActiveCategory] = useState('coffee');
-      const [selectedItem, setSelectedItem] = useState(null);
-      const [cart, setCart] = useState([]);
-      const [editingCartId, setEditingCartId] = useState(null);
-      
-      const [itemToRemove, setItemToRemove] = useState(null);
-      const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
-      const [showPointPrompt, setShowPointPrompt] = useState(false);
-      const [showPhoneInput, setShowPhoneInput] = useState(false);
-      const [phoneNumber, setPhoneNumber] = useState('');
-      
-      const [options, setOptions] = useState({ 
-        temp: 'HOT', cup: '매장컵', shot: '기본', syrup: '없음', ice: '보통', richness: '기본', pearl: '없음', request: '' 
-      });
-
-      const handleCategoryClick = (cat) => { playChime(); setActiveCategory(cat); };
-      const handleSelectMenu = (item) => {
-        playChime(); setSelectedItem(item);
-        setOptions({ temp: 'HOT', cup: '매장컵', shot: '기본', syrup: '없음', ice: '보통', richness: '기본', pearl: '없음', request: '' });
-        setEditingCartId(null); setScreen('options');
-      };
-      const handleEditCartItem = (item) => {
-        playChime(); setSelectedItem(MENU_ITEMS.find(m => m.id === item.id));
-        setOptions(item.selectedOptions); setEditingCartId(item.cartId); setScreen('options');
-      };
-      const handleOptionChange = (key, value) => { playChime(); setOptions({ ...options, [key]: value }); };
-
-      const handleAddToCart = () => {
-        playChime();
-        let finalPrice = selectedItem.price;
-        if (options.shot === '1샷 추가') finalPrice += 500;
-        if (options.shot === '2샷 추가') finalPrice += 1000;
-        if (options.syrup === '바닐라' || options.syrup === '헤이즐넛') finalPrice += 500;
-        if (options.pearl === '추가') finalPrice += 500;
+        // 상태 변수
+        let screen = 'menu';
+        let activeCategory = 'coffee';
+        let selectedItem = null;
+        let cart = [];
+        let editingCartId = null;
         
-        if (editingCartId) {
-          setCart(cart.map(item => item.cartId === editingCartId ? { ...selectedItem, selectedOptions: options, finalPrice, cartId: editingCartId } : item));
-          setEditingCartId(null);
-        } else {
-          setCart([...cart, { ...selectedItem, selectedOptions: options, finalPrice, cartId: Date.now() }]);
-        }
-        setScreen('menu');
-      };
+        let itemToRemove = null;
+        let showPaymentConfirm = false;
+        let showPointPrompt = false;
+        let showPhoneInput = false;
+        let phoneNumber = '';
+        
+        let options = { 
+            temp: 'HOT', cup: '매장컵', shot: '기본', syrup: '없음', ice: '보통', richness: '기본', pearl: '없음', request: '' 
+        };
 
-      const handleAttemptRemove = (cartId) => { playChime(); setItemToRemove(cartId); speakText("주문을 취소하시겠습니까?"); };
-      const confirmRemove = () => { playChime(); setCart(cart.filter(item => item.cartId !== itemToRemove)); setItemToRemove(null); };
-      const cancelRemove = () => { playChime(); setItemToRemove(null); };
-      const handleAttemptPayment = () => { playChime(); setShowPaymentConfirm(true); speakText("결제하시겠습니까?"); };
-      const cancelPayment = () => { playChime(); setShowPaymentConfirm(false); };
-      const confirmPayment = () => { playChime(); setShowPaymentConfirm(false); setShowPointPrompt(true); speakText("포인트 적립 하시겠습니까?"); };
-      const handlePointYes = () => { playChime(); setShowPointPrompt(false); setPhoneNumber(''); setShowPhoneInput(true); speakText("전화번호를 입력해 주세요."); };
-      const handlePointNo = () => { playChime(); setShowPointPrompt(false); setScreen('payment'); };
-      const handleKeypadPress = (key) => {
-        playChime();
-        if (key === '초기화') setPhoneNumber('');
-        else if (key === '지우기') setPhoneNumber(prev => prev.slice(0, -1));
-        else { if (phoneNumber.length < 11) setPhoneNumber(prev => prev + key); }
-      };
-      const handlePhoneSubmit = () => { playChime(); setShowPhoneInput(false); setScreen('payment'); };
-      const handlePhoneCancel = () => { playChime(); setShowPhoneInput(false); setShowPointPrompt(true); speakText("포인트 적립 하시겠습니까?"); };
-      const handleScreenChange = (newScreen) => { playChime(); setScreen(newScreen); };
-      const getTotalPrice = () => cart.reduce((sum, item) => sum + item.finalPrice, 0);
+        // 오디오 및 음성 합성
+        let audioCtx = null;
+        const playChime = () => {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
 
-      return (
-        <div className="w-[480px] h-[850px] mx-auto bg-[#212121] rounded-[3rem] p-4 flex flex-col shadow-2xl relative select-none scale-[0.8] sm:scale-100 origin-top">
-          <div className="h-12 flex items-center justify-center shrink-0">
-            <div className="w-16 h-2 bg-gray-600 rounded-full"></div>
-          </div>
+                const playNote = (freq, startTime, duration) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + startTime);
+                    
+                    gain.gain.setValueAtTime(0, audioCtx.currentTime + startTime);
+                    gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + startTime + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + startTime + duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start(audioCtx.currentTime + startTime);
+                    osc.stop(audioCtx.currentTime + startTime + duration);
+                };
 
-          <div className="flex-1 bg-[#EDEDED] text-[#212121] rounded-[2rem] overflow-hidden relative border-[6px] border-[#212121] flex flex-col">
+                playNote(659.25, 0, 0.15);     // 띨 (E5)
+                playNote(880.00, 0.12, 0.3);   // 롱 (A5)
+            } catch (e) { console.warn("오디오 재생 실패:", e); }
+        };
+
+        const speakText = (text) => {
+            try {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'ko-KR';
+                    utterance.rate = 1.0;
+                    window.speechSynthesis.speak(utterance);
+                }
+            } catch (e) { console.warn("음성 재생 실패:", e); }
+        };
+
+        // 유틸리티 함수
+        const getTotalPrice = () => cart.reduce((sum, item) => sum + item.finalPrice, 0);
+
+        const getOptionString = (item) => {
+            let parts = [];
+            if (item.category !== 'dessert') parts.push(`${item.selectedOptions.temp} / ${item.selectedOptions.cup}`);
+            if (item.selectedOptions.syrup !== '없음') parts.push(`${item.selectedOptions.syrup}시럽`);
+            if (item.category === 'coffee' && item.selectedOptions.shot !== '기본') parts.push(item.selectedOptions.shot);
+            if (item.category === 'beverage' && item.selectedOptions.richness === '진하게') parts.push('농도 진하게');
+            if (item.selectedOptions.pearl === '추가') parts.push('펄 추가');
+            return parts.join(", ");
+        };
+
+        const formatPhoneNumber = (num) => {
+            if (!num) return '<span class="text-gray-300">010-XXXX-XXXX</span>';
+            if (num.length <= 3) return num;
+            if (num.length <= 7) return `${num.slice(0, 3)}-${num.slice(3)}`;
+            return `${num.slice(0, 3)}-${num.slice(3, 7)}-${num.slice(7)}`;
+        };
+
+        // 액션 함수
+        window.handleCategoryClick = (cat) => { playChime(); activeCategory = cat; render(); };
+        
+        window.handleSelectMenu = (id) => {
+            playChime();
+            selectedItem = MENU_ITEMS.find(m => m.id === id);
+            options = { temp: 'HOT', cup: '매장컵', shot: '기본', syrup: '없음', ice: '보통', richness: '기본', pearl: '없음', request: '' };
+            editingCartId = null;
+            screen = 'options';
+            render();
+        };
+
+        window.handleEditCartItem = (cartId) => {
+            playChime();
+            const item = cart.find(c => c.cartId === cartId);
+            selectedItem = MENU_ITEMS.find(m => m.id === item.id);
+            options = { ...item.selectedOptions };
+            editingCartId = cartId;
+            screen = 'options';
+            render();
+        };
+
+        window.handleOptionChange = (key, value) => {
+            playChime();
+            options[key] = value;
+            render();
+        };
+
+        window.updateRequest = (value) => {
+            // 인풋 필드 타이핑 중 전체 재렌더링 방지
+            options.request = value;
+        };
+
+        window.handleAddToCart = () => {
+            playChime();
+            let finalPrice = selectedItem.price;
+            if (options.shot === '1샷 추가') finalPrice += 500;
+            if (options.shot === '2샷 추가') finalPrice += 1000;
+            if (options.syrup === '바닐라' || options.syrup === '헤이즐넛') finalPrice += 500;
+            if (options.pearl === '추가') finalPrice += 500;
             
-            {screen === 'menu' && (
-              <div className="fade-in flex flex-col h-full">
-                <div className="flex border-b border-gray-200 bg-[#F5F5F5] shrink-0">
-                  {['coffee', 'beverage', 'dessert'].map((cat) => (
-                    <button key={cat} onClick={() => handleCategoryClick(cat)} className={`flex-1 py-5 text-xl font-bold transition-all ${activeCategory === cat ? 'bg-[#EDEDED] border-b-4 border-[#212121] text-[#212121]' : 'text-gray-400 hover:bg-gray-200'}`}>
-                      {cat === 'coffee' ? '커피' : cat === 'beverage' ? '음료' : '디저트'}
-                    </button>
-                  ))}
-                </div>
+            if (editingCartId) {
+                const index = cart.findIndex(item => item.cartId === editingCartId);
+                cart[index] = { ...selectedItem, selectedOptions: { ...options }, finalPrice, cartId: editingCartId };
+                editingCartId = null;
+            } else {
+                cart.push({ ...selectedItem, selectedOptions: { ...options }, finalPrice, cartId: Date.now() });
+            }
+            screen = 'menu';
+            render();
+        };
 
-                <div className="flex-1 overflow-y-auto p-4 grid grid-cols-2 gap-4 content-start bg-[#EDEDED]">
-                  {MENU_ITEMS.filter(i => i.category === activeCategory).map(item => (
-                    <button key={item.id} onClick={() => handleSelectMenu(item)} className="bg-[#F5F5F5] border border-gray-200 rounded-2xl p-4 flex flex-col items-center shadow-sm hover:border-[#212121] transition-colors">
-                      <div className="w-full h-32 bg-[#EDEDED] rounded-xl mb-3 border border-gray-100"></div>
-                      <p className="font-bold text-lg mb-1">{item.name}</p>
-                      <p className="font-bold text-xl mb-3">{item.price.toLocaleString()}원</p>
-                      <div className="w-full py-3 bg-[#212121] text-white rounded-xl font-bold flex justify-center items-center gap-1">
-                        <Plus size={18}/> 담기
-                      </div>
-                    </button>
-                  ))}
-                </div>
+        window.handleAttemptRemove = (cartId) => {
+            playChime();
+            itemToRemove = cartId;
+            speakText("주문을 취소하시겠습니까?");
+            render();
+        };
+        window.confirmRemove = () => { playChime(); cart = cart.filter(item => item.cartId !== itemToRemove); itemToRemove = null; render(); };
+        window.cancelRemove = () => { playChime(); itemToRemove = null; render(); };
 
-                {cart.length > 0 && (
-                  <div className="bg-[#F5F5F5] border-t border-gray-200 shadow-[0_-5px_20px_rgba(0,0,0,0.08)] flex flex-col shrink-0 max-h-[320px] rounded-t-3xl">
-                    <div className="px-5 py-3 border-b border-gray-200 flex justify-between items-center shrink-0">
-                      <span className="font-bold text-gray-500">주문 목록 ({cart.length})</span>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                      {cart.map((item) => (
-                        <div key={item.cartId} onClick={() => handleEditCartItem(item)} className="flex justify-between items-center bg-[#EDEDED] border border-gray-200 p-3 rounded-xl cursor-pointer hover:bg-gray-200 active:bg-gray-300 transition-colors">
-                          <div className="flex flex-col flex-1">
-                            <span className="font-bold text-lg leading-tight">{item.name}</span>
-                            <span className="text-xs text-gray-500 mt-1 font-medium line-clamp-1">
-                              {item.category !== 'dessert' && `${item.selectedOptions.temp} / ${item.selectedOptions.cup}`}
-                              {item.selectedOptions.syrup !== '없음' && `, ${item.selectedOptions.syrup}시럽`}
-                              {item.category === 'coffee' && item.selectedOptions.shot !== '기본' && `, ${item.selectedOptions.shot}`}
-                              {item.category === 'beverage' && item.selectedOptions.richness === '진하게' && `, 농도 진하게`}
-                              {item.selectedOptions.pearl === '추가' && `, 펄 추가`}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-4 ml-2">
-                            <span className="font-bold text-lg">{item.finalPrice.toLocaleString()}원</span>
-                            <button onClick={(e) => { e.stopPropagation(); handleAttemptRemove(item.cartId); }} className="p-2 bg-[#F5F5F5] rounded-full border border-gray-200 text-gray-400 hover:text-red-500 shadow-sm transition-colors">
-                              <X size={18} />
+        window.handleAttemptPayment = () => {
+            playChime();
+            showPaymentConfirm = true;
+            speakText("결제하시겠습니까?");
+            render();
+        };
+        window.cancelPayment = () => { playChime(); showPaymentConfirm = false; render(); };
+        window.confirmPayment = () => {
+            playChime();
+            showPaymentConfirm = false;
+            showPointPrompt = true;
+            speakText("포인트 적립 하시겠습니까?");
+            render();
+        };
+
+        window.handlePointYes = () => {
+            playChime();
+            showPointPrompt = false;
+            phoneNumber = '';
+            showPhoneInput = true;
+            speakText("전화번호를 입력해 주세요.");
+            render();
+        };
+        window.handlePointNo = () => {
+            playChime();
+            showPointPrompt = false;
+            screen = 'payment';
+            speakText("카드를 꽂아주세요.");
+            render();
+        };
+
+        window.handleKeypadPress = (key) => {
+            playChime();
+            if (key === '초기화') phoneNumber = '';
+            else if (key === '지우기') phoneNumber = phoneNumber.slice(0, -1);
+            else if (phoneNumber.length < 11) phoneNumber += key;
+            render();
+        };
+        window.handlePhoneSubmit = () => {
+            playChime();
+            showPhoneInput = false;
+            screen = 'payment';
+            speakText("카드를 꽂아주세요.");
+            render();
+        };
+        window.handlePhoneCancel = () => {
+            playChime();
+            showPhoneInput = false;
+            showPointPrompt = true;
+            speakText("포인트 적립 하시겠습니까?");
+            render();
+        };
+
+        window.handleScreenChange = (newScreen) => { playChime(); screen = newScreen; render(); };
+
+        window.completePayment = () => {
+            playChime();
+            cart = [];
+            screen = 'menu';
+            alert('결제가 정상적으로 완료되었습니다.');
+            render();
+        };
+
+
+        // 렌더링 엔진
+        function render() {
+            const app = document.getElementById('app');
+            let html = '';
+
+            // 1. 메인 메뉴 화면
+            if (screen === 'menu') {
+                html += `
+                <div class="fade-in flex flex-col h-full">
+                    <div class="flex border-b border-gray-200 bg-[#F5F5F5] shrink-0">
+                        ${['coffee', 'beverage', 'dessert'].map(cat => `
+                            <button onclick="handleCategoryClick('${cat}')" class="flex-1 py-5 text-xl font-bold transition-all ${activeCategory === cat ? 'bg-[#EDEDED] border-b-4 border-[#212121] text-[#212121]' : 'text-gray-400 hover:bg-gray-200'}">
+                                ${cat === 'coffee' ? '커피' : cat === 'beverage' ? '음료' : '디저트'}
                             </button>
-                          </div>
-                        </div>
-                      ))}
+                        `).join('')}
                     </div>
-                    <div className="p-4 bg-[#F5F5F5] shrink-0">
-                      <button onClick={handleAttemptPayment} className="w-full py-4 bg-[#212121] text-white rounded-xl text-2xl font-bold flex justify-between px-6 items-center shadow-lg active:scale-[0.98] transition-transform">
-                        <span>결제하기</span><span>{getTotalPrice().toLocaleString()}원</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
 
-            {screen === 'options' && selectedItem && (
-              <div className="fade-in flex flex-col h-full bg-[#EDEDED]">
-                <div className="px-5 py-4 border-b border-gray-200 bg-[#F5F5F5] flex items-center gap-3 shrink-0">
-                  <button onClick={() => handleScreenChange('menu')} className="p-2 rounded-full bg-[#EDEDED] hover:bg-gray-200">
-                    <ChevronLeft size={24} />
-                  </button>
-                  <h2 className="text-xl font-bold">{selectedItem.name} 상세 선택</h2>
-                </div>
-                <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-32">
-                  {(selectedItem.category === 'coffee' || selectedItem.category === 'beverage') && (
-                    <>
-                      <section>
-                        <p className="font-bold mb-3 text-lg">온도 선택</p>
-                        <div className="grid grid-cols-2 gap-3">
-                          {['HOT', 'ICE'].map(t => (
-                            <button key={t} onClick={() => handleOptionChange('temp', t)} className={`py-4 rounded-xl border-2 font-bold text-lg transition-colors ${options.temp === t ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}`}>{t}</button>
-                          ))}
+                    <div class="flex-1 overflow-y-auto p-4 grid grid-cols-2 gap-4 content-start bg-[#EDEDED]">
+                        ${MENU_ITEMS.filter(i => i.category === activeCategory).map(item => `
+                            <button onclick="handleSelectMenu('${item.id}')" class="bg-[#F5F5F5] border border-gray-200 rounded-2xl p-4 flex flex-col items-center shadow-sm hover:border-[#212121] transition-colors">
+                                <div class="w-full h-32 bg-[#EDEDED] rounded-xl mb-3 flex items-center justify-center text-sm font-bold text-gray-400 border border-gray-100 overflow-hidden"></div>
+                                <p class="font-bold text-lg mb-1">${item.name}</p>
+                                <p class="font-bold text-xl mb-3">${item.price.toLocaleString()}원</p>
+                                <div class="w-full py-3 bg-[#212121] text-white rounded-xl font-bold flex justify-center items-center gap-1">
+                                    ${Icons.Plus} 담기
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    ${cart.length > 0 ? `
+                        <div class="bg-[#F5F5F5] border-t border-gray-200 shadow-[0_-5px_20px_rgba(0,0,0,0.08)] flex flex-col shrink-0 max-h-[320px] rounded-t-3xl">
+                            <div class="px-5 py-3 border-b border-gray-200 flex justify-between items-center shrink-0">
+                                <span class="font-bold text-gray-500">주문 목록 (${cart.length})</span>
+                            </div>
+                            
+                            <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                                ${cart.map(item => `
+                                    <div onclick="handleEditCartItem(${item.cartId})" class="flex justify-between items-center bg-[#EDEDED] border border-gray-200 p-3 rounded-xl cursor-pointer hover:bg-gray-200 active:bg-gray-300 transition-colors">
+                                        <div class="flex flex-col flex-1">
+                                            <span class="font-bold text-lg leading-tight">${item.name}</span>
+                                            <span class="text-xs text-gray-500 mt-1 font-medium line-clamp-1">
+                                                ${getOptionString(item)}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center gap-4 ml-2">
+                                            <span class="font-bold text-lg">${item.finalPrice.toLocaleString()}원</span>
+                                            <button onclick="event.stopPropagation(); handleAttemptRemove(${item.cartId});" class="p-2 bg-[#F5F5F5] rounded-full border border-gray-200 text-gray-400 hover:text-red-500 shadow-sm transition-colors">
+                                                ${Icons.X}
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <div class="p-4 bg-[#F5F5F5] shrink-0">
+                                <button onclick="handleAttemptPayment()" class="w-full py-4 bg-[#212121] text-white rounded-xl text-2xl font-bold flex justify-between px-6 items-center shadow-lg active:scale-[0.98] transition-transform">
+                                    <span>결제하기</span>
+                                    <span>${getTotalPrice().toLocaleString()}원</span>
+                                </button>
+                            </div>
                         </div>
-                      </section>
-                      <section>
-                        <p className="font-bold mb-3 text-lg">컵 종류</p>
-                        <div className="grid grid-cols-3 gap-3">
-                          {['매장컵', '개인텀블러', '일회용컵'].map(c => (
-                            <button key={c} onClick={() => handleOptionChange('cup', c)} className={`py-4 rounded-xl border-2 font-bold transition-colors ${options.cup === c ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}`}>{c}</button>
-                          ))}
-                        </div>
-                      </section>
-                      <section>
-                        <p className="font-bold mb-3 text-lg">시럽 추가 (+500원)</p>
-                        <div className="grid grid-cols-3 gap-3">
-                          {['없음', '바닐라', '헤이즐넛'].map(s => (
-                            <button key={s} onClick={() => handleOptionChange('syrup', s)} className={`py-4 rounded-xl border-2 font-bold transition-colors ${options.syrup === s ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}`}>{s}</button>
-                          ))}
-                        </div>
-                      </section>
-                      {options.temp === 'ICE' && (
+                    ` : ''}
+                </div>`;
+            }
+
+            // 2. 옵션 화면
+            if (screen === 'options' && selectedItem) {
+                html += `
+                <div class="fade-in flex flex-col h-full bg-[#EDEDED]">
+                    <div class="px-5 py-4 border-b border-gray-200 bg-[#F5F5F5] flex items-center gap-3 shrink-0">
+                        <button onclick="handleScreenChange('menu')" class="p-2 rounded-full bg-[#EDEDED] hover:bg-gray-200">
+                            ${Icons.ChevronLeft}
+                        </button>
+                        <h2 class="text-xl font-bold">${selectedItem.name} 상세 선택</h2>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-6 space-y-8 pb-32">
+                        ${(selectedItem.category === 'coffee' || selectedItem.category === 'beverage') ? `
+                            <section>
+                                <p class="font-bold mb-3 text-lg">온도 선택</p>
+                                <div class="grid grid-cols-2 gap-3">
+                                    ${['HOT', 'ICE'].map(t => `<button onclick="handleOptionChange('temp', '${t}')" class="py-4 rounded-xl border-2 font-bold text-lg transition-colors ${options.temp === t ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}">${t}</button>`).join('')}
+                                </div>
+                            </section>
+                            <section>
+                                <p class="font-bold mb-3 text-lg">컵 종류</p>
+                                <div class="grid grid-cols-3 gap-3">
+                                    ${['매장컵', '개인텀블러', '일회용컵'].map(c => `<button onclick="handleOptionChange('cup', '${c}')" class="py-4 rounded-xl border-2 font-bold transition-colors ${options.cup === c ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}">${c}</button>`).join('')}
+                                </div>
+                            </section>
+                            <section>
+                                <p class="font-bold mb-3 text-lg">시럽 추가 (+500원)</p>
+                                <div class="grid grid-cols-3 gap-3">
+                                    ${['없음', '바닐라', '헤이즐넛'].map(s => `<button onclick="handleOptionChange('syrup', '${s}')" class="py-4 rounded-xl border-2 font-bold transition-colors ${options.syrup === s ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}">${s}</button>`).join('')}
+                                </div>
+                            </section>
+                            ${options.temp === 'ICE' ? `
+                                <section>
+                                    <p class="font-bold mb-3 text-lg">얼음 양</p>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        ${['적게', '보통', '많이'].map(i => `<button onclick="handleOptionChange('ice', '${i}')" class="py-4 rounded-xl border-2 font-bold transition-colors ${options.ice === i ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}">${i}</button>`).join('')}
+                                    </div>
+                                </section>
+                            ` : ''}
+                        ` : ''}
+
+                        ${selectedItem.category === 'coffee' ? `
+                            <section>
+                                <p class="font-bold mb-3 text-lg">샷 추가 (+500원)</p>
+                                <div class="grid grid-cols-3 gap-3">
+                                    ${['기본', '1샷 추가', '2샷 추가'].map(s => `<button onclick="handleOptionChange('shot', '${s}')" class="py-4 rounded-xl border-2 font-bold transition-colors ${options.shot === s ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}">${s}</button>`).join('')}
+                                </div>
+                            </section>
+                        ` : ''}
+
+                        ${selectedItem.category === 'beverage' ? `
+                            <section>
+                                <p class="font-bold mb-3 text-lg">농도 조절</p>
+                                <div class="grid grid-cols-2 gap-3">
+                                    ${['기본', '진하게'].map(r => `<button onclick="handleOptionChange('richness', '${r}')" class="py-4 rounded-xl border-2 font-bold text-lg transition-colors ${options.richness === r ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}">${r}</button>`).join('')}
+                                </div>
+                            </section>
+                        ` : ''}
+
+                        ${['말차라떼', '딸기라떼', '밀크티'].includes(selectedItem.name) ? `
+                            <section>
+                                <p class="font-bold mb-3 text-lg">타피오카 펄 추가 (+500원)</p>
+                                <div class="grid grid-cols-2 gap-3">
+                                    ${['없음', '추가'].map(p => `<button onclick="handleOptionChange('pearl', '${p}')" class="py-4 rounded-xl border-2 font-bold text-lg transition-colors ${options.pearl === p ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}">${p}</button>`).join('')}
+                                </div>
+                            </section>
+                        ` : ''}
+
                         <section>
-                          <p className="font-bold mb-3 text-lg">얼음 양</p>
-                          <div className="grid grid-cols-3 gap-3">
-                            {['적게', '보통', '많이'].map(i => (
-                              <button key={i} onClick={() => handleOptionChange('ice', i)} className={`py-4 rounded-xl border-2 font-bold transition-colors ${options.ice === i ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}`}>{i}</button>
-                            ))}
-                          </div>
+                            <p class="font-bold mb-3 text-lg">기타 요청사항</p>
+                            <input 
+                                type="text" 
+                                placeholder="예: 덜 달게 해주세요" 
+                                class="w-full p-4 bg-[#F5F5F5] border-2 border-gray-200 rounded-xl font-medium focus:border-[#212121] focus:outline-none" 
+                                value="${options.request}" 
+                                oninput="updateRequest(this.value)" 
+                            />
                         </section>
-                      )}
-                    </>
-                  )}
-                  {selectedItem.category === 'coffee' && (
-                    <section>
-                      <p className="font-bold mb-3 text-lg">샷 추가 (+500원)</p>
-                      <div className="grid grid-cols-3 gap-3">
-                        {['기본', '1샷 추가', '2샷 추가'].map(s => (
-                          <button key={s} onClick={() => handleOptionChange('shot', s)} className={`py-4 rounded-xl border-2 font-bold transition-colors ${options.shot === s ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}`}>{s}</button>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                  {selectedItem.category === 'beverage' && (
-                    <section>
-                      <p className="font-bold mb-3 text-lg">농도 조절</p>
-                      <div className="grid grid-cols-2 gap-3">
-                        {['기본', '진하게'].map(r => (
-                          <button key={r} onClick={() => handleOptionChange('richness', r)} className={`py-4 rounded-xl border-2 font-bold text-lg transition-colors ${options.richness === r ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}`}>{r}</button>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                  {(selectedItem.name === '말차라떼' || selectedItem.name === '딸기라떼' || selectedItem.name === '밀크티') && (
-                    <section>
-                      <p className="font-bold mb-3 text-lg">타피오카 펄 추가 (+500원)</p>
-                      <div className="grid grid-cols-2 gap-3">
-                        {['없음', '추가'].map(p => (
-                          <button key={p} onClick={() => handleOptionChange('pearl', p)} className={`py-4 rounded-xl border-2 font-bold text-lg transition-colors ${options.pearl === p ? 'bg-[#212121] border-[#212121] text-white' : 'bg-[#F5F5F5] border-gray-200 text-gray-500'}`}>{p}</button>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                  <section>
-                    <p className="font-bold mb-3 text-lg">기타 요청사항</p>
-                    <input type="text" placeholder="예: 덜 달게 해주세요" className="w-full p-4 bg-[#F5F5F5] border-2 border-gray-200 rounded-xl font-medium focus:border-[#212121] focus:outline-none" value={options.request} onChange={(e) => setOptions({...options, request: e.target.value})} />
-                  </section>
-                </div>
-                <div className="absolute bottom-0 w-full p-4 bg-[#F5F5F5] border-t border-gray-200 flex gap-3 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-                  <button onClick={() => handleScreenChange('menu')} className="w-1/3 py-4 bg-[#EDEDED] rounded-xl font-bold text-lg text-gray-600 hover:bg-gray-300">취소</button>
-                  <button onClick={handleAddToCart} className="w-2/3 py-4 bg-[#212121] text-white rounded-xl font-bold text-xl">{editingCartId ? '옵션 변경 완료' : '장바구니 담기'}</button>
-                </div>
-              </div>
-            )}
+                    </div>
 
-            {screen === 'payment' && (
-              <div className="fade-in absolute inset-0 bg-[#EDEDED] z-50 flex flex-col items-center justify-center p-10">
-                <CreditCard size={80} className="text-[#212121] mb-8" />
-                <h2 className="text-3xl font-bold mb-4 text-[#212121]">카드를 꽂아주세요</h2>
-                <p className="text-lg text-gray-500 mb-10 font-medium">결제가 완료될 때까지 카드를 빼지 마세요.</p>
-                <div className="w-full p-6 bg-[#F5F5F5] rounded-2xl border border-gray-200 text-center mb-10 shadow-sm">
-                  <p className="text-gray-500 mb-2">최종 결제 금액</p>
-                  <p className="text-4xl font-black text-[#212121]">{getTotalPrice().toLocaleString()}원</p>
-                </div>
-                <button onClick={() => { playChime(); setCart([]); setScreen('menu'); alert('결제가 정상적으로 완료되었습니다.'); }} className="w-full py-5 bg-gray-300 text-[#212121] rounded-2xl text-xl font-bold hover:bg-gray-400 transition">처음으로 (결제 취소)</button>
-              </div>
-            )}
+                    <div class="absolute bottom-0 w-full p-4 bg-[#F5F5F5] border-t border-gray-200 flex gap-3 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+                        <button onclick="handleScreenChange('menu')" class="w-1/3 py-4 bg-[#EDEDED] rounded-xl font-bold text-lg text-gray-600 hover:bg-gray-300">취소</button>
+                        <button onclick="handleAddToCart()" class="w-2/3 py-4 bg-[#212121] text-white rounded-xl font-bold text-xl">${editingCartId ? '옵션 변경 완료' : '장바구니 담기'}</button>
+                    </div>
+                </div>`;
+            }
 
-            {itemToRemove !== null && (
-              <div className="fade-in absolute inset-0 bg-black/60 z-[100] flex items-center justify-center p-6">
-                <div className="bg-[#F5F5F5] rounded-3xl p-8 w-full shadow-2xl text-center border-[6px] border-[#212121]">
-                  <h3 className="text-2xl font-bold text-[#212121] mb-8">주문을 취소하시겠습니까?</h3>
-                  <div className="flex gap-3">
-                    <button onClick={cancelRemove} className="flex-1 py-4 bg-gray-300 text-[#212121] rounded-xl font-bold text-lg hover:bg-gray-400">아니오</button>
-                    <button onClick={confirmRemove} className="flex-1 py-4 bg-[#212121] text-white rounded-xl font-bold text-lg">예, 취소합니다</button>
-                  </div>
-                </div>
-              </div>
-            )}
+            // 3. 결제 화면
+            if (screen === 'payment') {
+                html += `
+                <div class="fade-in absolute inset-0 bg-[#EDEDED] z-50 flex flex-col items-center justify-center p-10">
+                    <div class="text-[#212121] mb-8">${Icons.CreditCard}</div>
+                    <h2 class="text-3xl font-bold mb-4 text-[#212121]">카드를 꽂아주세요</h2>
+                    <p class="text-lg text-gray-500 mb-10 font-medium">결제가 완료될 때까지 카드를 빼지 마세요.</p>
+                    <div class="w-full p-6 bg-[#F5F5F5] rounded-2xl border border-gray-200 text-center mb-10 shadow-sm">
+                        <p class="text-gray-500 mb-2">최종 결제 금액</p>
+                        <p class="text-4xl font-black text-[#212121]">${getTotalPrice().toLocaleString()}원</p>
+                    </div>
+                    <button onclick="completePayment()" class="w-full py-5 bg-gray-300 text-[#212121] rounded-2xl text-xl font-bold hover:bg-gray-400 transition">
+                        처음으로 (결제 시뮬레이션 종료)
+                    </button>
+                </div>`;
+            }
 
-            {showPaymentConfirm && (
-              <div className="fade-in absolute inset-0 bg-black/60 z-[100] flex items-center justify-center p-6">
-                <div className="bg-[#F5F5F5] rounded-3xl p-8 w-full shadow-2xl text-center border-[6px] border-[#212121]">
-                  <h3 className="text-2xl font-bold text-[#212121] mb-8">결제하시겠습니까?</h3>
-                  <div className="flex gap-3">
-                    <button onClick={cancelPayment} className="flex-1 py-4 bg-gray-300 text-[#212121] rounded-xl font-bold text-lg hover:bg-gray-400">아니오</button>
-                    <button onClick={confirmPayment} className="flex-1 py-4 bg-[#212121] text-white rounded-xl font-bold text-lg">예, 결제합니다</button>
-                  </div>
-                </div>
-              </div>
-            )}
+            // 모달들
+            if (itemToRemove !== null) {
+                html += `
+                <div class="fade-in absolute inset-0 bg-black/60 z-[100] flex items-center justify-center p-6">
+                    <div class="bg-[#F5F5F5] rounded-3xl p-8 w-full shadow-2xl text-center border-[6px] border-[#212121]">
+                        <h3 class="text-2xl font-bold text-[#212121] mb-8">주문을 취소하시겠습니까?</h3>
+                        <div class="flex gap-3">
+                            <button onclick="cancelRemove()" class="flex-1 py-4 bg-gray-300 text-[#212121] rounded-xl font-bold text-lg hover:bg-gray-400">아니오</button>
+                            <button onclick="confirmRemove()" class="flex-1 py-4 bg-[#212121] text-white rounded-xl font-bold text-lg">예, 취소합니다</button>
+                        </div>
+                    </div>
+                </div>`;
+            }
 
-            {showPointPrompt && (
-              <div className="fade-in absolute inset-0 bg-black/60 z-[100] flex items-center justify-center p-6">
-                <div className="bg-[#F5F5F5] rounded-3xl p-8 w-full shadow-2xl text-center border-[6px] border-[#212121]">
-                  <h3 className="text-2xl font-bold text-[#212121] mb-8">포인트 적립 하시겠습니까?</h3>
-                  <div className="flex gap-3">
-                    <button onClick={handlePointNo} className="flex-1 py-4 bg-gray-300 text-[#212121] rounded-xl font-bold text-lg hover:bg-gray-400">아니오</button>
-                    <button onClick={handlePointYes} className="flex-1 py-4 bg-[#212121] text-white rounded-xl font-bold text-lg">예, 적립합니다</button>
-                  </div>
-                </div>
-              </div>
-            )}
+            if (showPaymentConfirm) {
+                html += `
+                <div class="fade-in absolute inset-0 bg-black/60 z-[100] flex items-center justify-center p-6">
+                    <div class="bg-[#F5F5F5] rounded-3xl p-8 w-full shadow-2xl text-center border-[6px] border-[#212121]">
+                        <h3 class="text-2xl font-bold text-[#212121] mb-8">결제하시겠습니까?</h3>
+                        <div class="flex gap-3">
+                            <button onclick="cancelPayment()" class="flex-1 py-4 bg-gray-300 text-[#212121] rounded-xl font-bold text-lg hover:bg-gray-400">아니오</button>
+                            <button onclick="confirmPayment()" class="flex-1 py-4 bg-[#212121] text-white rounded-xl font-bold text-lg">예, 결제합니다</button>
+                        </div>
+                    </div>
+                </div>`;
+            }
 
-            {showPhoneInput && (
-              <div className="fade-in absolute inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-                <div className="bg-[#F5F5F5] rounded-3xl p-6 w-full shadow-2xl border-[6px] border-[#212121] flex flex-col items-center">
-                  <h3 className="text-xl font-bold text-[#212121] mb-1">전화번호 입력</h3>
-                  <p className="text-[13px] font-bold text-blue-600 mb-6 bg-blue-50 px-3 py-1 rounded-full">※ 포인트 적립시 결제한 금액의 5%가 적립이 됩니다.</p>
-                  <div className="w-full bg-white border-2 border-gray-300 rounded-xl p-4 mb-5 text-center text-3xl font-bold tracking-widest h-16 flex items-center justify-center text-[#212121]">
-                    {!phoneNumber ? <span className="text-gray-300">010-XXXX-XXXX</span> : (phoneNumber.length <= 3 ? phoneNumber : phoneNumber.length <= 7 ? `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}` : `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`)}
-                  </div>
-                  <div className="grid grid-cols-3 gap-3 w-full mb-6">
-                    {['1', '2', '3', '4', '5', '6', '7', '8', '9', '초기화', '0', '지우기'].map((key) => (
-                      <button key={key} onClick={() => handleKeypadPress(key)} className={`py-4 rounded-xl font-bold text-xl shadow-sm transition-transform active:scale-95 ${key === '초기화' || key === '지우기' ? 'bg-gray-300 text-[#212121]' : 'bg-white border-2 border-gray-200 text-[#212121] hover:bg-gray-50'}`}>
-                        {key}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex gap-3 w-full">
-                    <button onClick={handlePhoneCancel} className="flex-1 py-4 bg-gray-300 text-[#212121] rounded-xl font-bold text-lg hover:bg-gray-400">이전</button>
-                    <button onClick={handlePhoneSubmit} disabled={phoneNumber.length < 11} className={`flex-1 py-4 rounded-xl font-bold text-lg transition-colors ${phoneNumber.length === 11 ? 'bg-[#212121] text-white' : 'bg-gray-400 text-gray-200 cursor-not-allowed'}`}>입력 완료</button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
+            if (showPointPrompt) {
+                html += `
+                <div class="fade-in absolute inset-0 bg-black/60 z-[100] flex items-center justify-center p-6">
+                    <div class="bg-[#F5F5F5] rounded-3xl p-8 w-full shadow-2xl text-center border-[6px] border-[#212121]">
+                        <h3 class="text-2xl font-bold text-[#212121] mb-8">포인트 적립 하시겠습니까?</h3>
+                        <div class="flex gap-3">
+                            <button onclick="handlePointNo()" class="flex-1 py-4 bg-gray-300 text-[#212121] rounded-xl font-bold text-lg hover:bg-gray-400">아니오</button>
+                            <button onclick="handlePointYes()" class="flex-1 py-4 bg-[#212121] text-white rounded-xl font-bold text-lg">예, 적립합니다</button>
+                        </div>
+                    </div>
+                </div>`;
+            }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+            if (showPhoneInput) {
+                html += `
+                <div class="fade-in absolute inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
+                    <div class="bg-[#F5F5F5] rounded-3xl p-6 w-full shadow-2xl border-[6px] border-[#212121] flex flex-col items-center">
+                        <h3 class="text-xl font-bold text-[#212121] mb-1">전화번호 입력</h3>
+                        <p class="text-[13px] font-bold text-blue-600 mb-6 bg-blue-50 px-3 py-1 rounded-full">
+                            ※ 포인트 적립시 결제한 금액의 5%가 적립이 됩니다.
+                        </p>
+
+                        <div class="w-full bg-white border-2 border-gray-300 rounded-xl p-4 mb-5 text-center text-3xl font-bold tracking-widest h-16 flex items-center justify-center text-[#212121]">
+                            ${formatPhoneNumber(phoneNumber)}
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-3 w-full mb-6">
+                            ${['1', '2', '3', '4', '5', '6', '7', '8', '9', '초기화', '0', '지우기'].map(key => `
+                                <button onclick="handleKeypadPress('${key}')" class="py-4 rounded-xl font-bold text-xl shadow-sm transition-transform active:scale-95 ${key === '초기화' || key === '지우기' ? 'bg-gray-300 text-[#212121]' : 'bg-white border-2 border-gray-200 text-[#212121] hover:bg-gray-50'}">
+                                    ${key}
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        <div class="flex gap-3 w-full">
+                            <button onclick="handlePhoneCancel()" class="flex-1 py-4 bg-gray-300 text-[#212121] rounded-xl font-bold text-lg hover:bg-gray-400">이전</button>
+                            <button onclick="handlePhoneSubmit()" ${phoneNumber.length < 11 ? 'disabled' : ''} class="flex-1 py-4 rounded-xl font-bold text-lg transition-colors ${phoneNumber.length === 11 ? 'bg-[#212121] text-white' : 'bg-gray-400 text-gray-200 cursor-not-allowed'}">입력 완료</button>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            app.innerHTML = html;
+        }
+
+        // 초기 렌더링
+        render();
+    </script>
 </body>
 </html>
+
+```
